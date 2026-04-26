@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opener-Provisionsrechner · Lang Consulting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+    --gold: #c9a961;
+    --gold-bright: #e8c573;
+    --gold-dark: #8a7038;
+    --gold-deep: #6b5628;
+    --gold-glow: rgba(201, 169, 97, 0.3);
+    --bg-black: #0a0a0a;
+    --bg-dark: #141414;
+    --bg-card: #1a1a1a;
+    --bg-card-hover: #1f1f1f;
+    --text-white: #ffffff;
+    --text-muted: #888;
+    --text-dim: #555;
+    --green: #6bcf8a;
+    --red: #e87373;
+    --orange: #e8a973;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-black);
+    color: var(--text-white);
+    overflow-x: hidden;
+    line-height: 1.6;
+    font-feature-settings: 'tnum' 1;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+        linear-gradient(rgba(201, 169, 97, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201, 169, 97, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.12;
+}
+.bg-orb.o1 { width: 500px; height: 500px; background: var(--gold); top: 10%; left: -10%; }
+.bg-orb.o2 { width: 400px; height: 400px; background: var(--gold-bright); top: 60%; right: -10%; }
+
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-bright) 100%);
+    z-index: 1000;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 10px var(--gold-glow);
+    width: 0;
+}
+
+/* NAV */
+.top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 1.2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(201, 169, 97, 0.1);
+}
+.logo-link { display: inline-flex; align-items: center; }
+.logo-img { height: 36px; width: auto; display: block; }
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.nav-badge {
+    padding: 0.5rem 1rem;
+    background: rgba(201, 169, 97, 0.1);
+    border: 1px solid rgba(201, 169, 97, 0.3);
+    border-radius: 50px;
+    font-size: 0.72rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+}
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.3rem;
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.nav-btn:hover {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+    box-shadow: 0 4px 20px var(--gold-glow);
+}
+.nav-btn svg { width: 14px; height: 14px; }
+.nav-btn.secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid rgba(201, 169, 97, 0.3);
+}
+.nav-btn.secondary:hover {
+    background: rgba(201, 169, 97, 0.08);
+    color: var(--gold);
+    border-color: var(--gold);
+    box-shadow: none;
+}
+
+/* SECTIONS */
+.section {
+    padding: 6rem 2rem 3rem;
+    position: relative;
+    z-index: 2;
+}
+.content {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* HERO */
+.section.hero-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 2rem 2rem;
+}
+.hero {
+    text-align: center;
+    padding: 2rem 0 2rem;
+    position: relative;
+}
+.hero::before {
+    content: '€';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(18rem, 36vw, 28rem);
+    font-weight: 900;
+    color: rgba(201, 169, 97, 0.03);
+    z-index: -1;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+    font-family: 'Playfair Display', serif;
+}
+.hero-badge {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    background: rgba(201, 169, 97, 0.1);
+    border: 1px solid rgba(201, 169, 97, 0.3);
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin-bottom: 2.5rem;
+    font-weight: 600;
+}
+.hero h1 {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 0.95;
+    margin-bottom: 1.8rem;
+    letter-spacing: -0.03em;
+}
+.hero h1 .line1 {
+    display: block;
+    background: linear-gradient(180deg, #ffffff 0%, #888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero h1 .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero .subtitle {
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+    color: var(--text-muted);
+    margin: 0 auto 2rem;
+    font-weight: 300;
+    max-width: 780px;
+}
+
+.gold-text {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* SECTION LABEL */
+.section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.5rem 1.2rem;
+    background: rgba(201, 169, 97, 0.08);
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+.section-label::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--gold);
+}
+
+h2 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+h2 + .section-sub {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 760px;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+}
+
+/* CALCULATOR CARD */
+.calculator {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #0f0f0f 100%);
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin: 1.5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+.calculator::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+}
+
+.calc-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.12);
+}
+.calc-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+.calc-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+}
+.calc-num {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border-radius: 50%;
+    color: #000;
+    font-size: 1.05rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px var(--gold-glow);
+}
+.calc-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-white);
+    letter-spacing: -0.01em;
+}
+.calc-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+/* INPUTS */
+.inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+.input-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.7rem;
+    font-weight: 600;
+}
+.input-label small {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    display: block;
+    margin-top: 0.25rem;
+}
+.calc-input, .calc-select {
+    width: 100%;
+    padding: 0.95rem 1.2rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(201, 169, 97, 0.2);
+    border-radius: 12px;
+    color: var(--text-white);
+    font-size: 1.02rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.25s ease;
+    font-feature-settings: 'tnum' 1;
+}
+.calc-input:focus, .calc-select:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 0 4px rgba(201, 169, 97, 0.1);
+}
+.calc-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23c9a961' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 1.2rem center;
+    padding-right: 2.8rem;
+}
+.input-wrap { position: relative; }
+.input-suffix {
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    pointer-events: none;
+}
+.calc-input.has-suffix { padding-right: 2.5rem; }
+
+.calc-input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    color-scheme: dark;
+    cursor: pointer;
+    font-family: inherit;
+    padding-right: 1rem;
+}
+.calc-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(75%) sepia(25%) saturate(800%) hue-rotate(10deg) brightness(95%);
+    cursor: pointer;
+    opacity: 0.85;
+}
+.calc-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* DERIVED-QUOTE BADGE */
+.derived-quote-row {
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    background: rgba(201, 169, 97, 0.04);
+    border: 1px dashed rgba(201, 169, 97, 0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    align-items: center;
+}
+.derived-quote-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.derived-quote-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+}
+.derived-quote-val {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--gold);
+    font-feature-settings: 'tnum' 1;
+}
+
+/* FUNNEL VISUAL */
+.funnel-wrap {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(201, 169, 97, 0.12);
+    border-radius: 20px;
+}
+.funnel-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 0.9rem 0;
+    border-bottom: 1px dashed rgba(201, 169, 97, 0.08);
+}
+.funnel-row:last-child { border-bottom: none; }
+.funnel-stage {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 200px;
+}
+.funnel-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold-glow);
+    flex-shrink: 0;
+}
+.funnel-name {
+    font-size: 0.78rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+}
+.funnel-bar-wrap {
+    height: 10px;
+    background: rgba(201, 169, 97, 0.06);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+}
+.funnel-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+    border-radius: 50px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 10px var(--gold-glow);
+}
+.funnel-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-white);
+    font-feature-settings: 'tnum' 1;
+    min-width: 120px;
+    text-align: right;
+}
+.funnel-val small {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.15rem;
+}
+
+/* KPI GRID */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.2rem;
+    margin: 2rem 0 0;
+}
+.kpi-card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #0f0f0f 100%);
+    border: 1px solid rgba(201, 169, 97, 0.15);
+    border-radius: 16px;
+    padding: 1.6rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+.kpi-card:hover { border-color: rgba(201, 169, 97, 0.35); }
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+}
+.kpi-card.accent::before {
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+    opacity: 1;
+    height: 3px;
+}
+.kpi-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.9rem;
+    font-weight: 600;
+}
+.kpi-card.accent .kpi-label { color: var(--gold); }
+.kpi-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-white);
+    letter-spacing: -0.02em;
+    font-feature-settings: 'tnum' 1;
+}
+.kpi-card.accent .kpi-value {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.kpi-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+}
+
+/* CADENCE CARDS */
+.cadence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+}
+.cadence-card {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(201, 169, 97, 0.18);
+    border-radius: 14px;
+    padding: 1.3rem 1.4rem;
+    position: relative;
+}
+.cadence-card.gold {
+    border-color: rgba(201, 169, 97, 0.4);
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.08), rgba(201, 169, 97, 0.02));
+}
+.cadence-period {
+    font-size: 0.7rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+.cadence-rows { display: flex; flex-direction: column; gap: 0.45rem; }
+.cadence-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.85rem;
+}
+.cadence-row .lbl { color: var(--text-muted); }
+.cadence-row .val {
+    font-weight: 700;
+    color: var(--text-white);
+    font-feature-settings: 'tnum' 1;
+    font-size: 0.95rem;
+}
+
+/* SCORE GAUGE */
+.score-card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #0f0f0f 100%);
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-radius: 24px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.score-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+}
+.score-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2.5rem;
+    align-items: center;
+}
+.score-circle {
+    width: 200px; height: 200px;
+    position: relative;
+    flex-shrink: 0;
+}
+.score-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-circle .track {
+    fill: none;
+    stroke: rgba(201, 169, 97, 0.08);
+    stroke-width: 14;
+}
+.score-circle .arc {
+    fill: none;
+    stroke: url(#gauge-grad);
+    stroke-width: 14;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.score-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+.score-num {
+    font-size: 3.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-feature-settings: 'tnum' 1;
+}
+.score-num.warn {
+    background: linear-gradient(135deg, var(--orange) 0%, #ffb678 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.score-num.crit {
+    background: linear-gradient(135deg, var(--red) 0%, #ff8888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.score-num.top {
+    background: linear-gradient(135deg, var(--green) 0%, #8de89e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.score-of {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.score-title {
+    font-size: 0.78rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+.score-headline {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-white);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
+    line-height: 1.2;
+}
+.score-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+/* MASSNAHMEN */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+}
+.action-card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #0f0f0f 100%);
+    border: 1px solid rgba(201, 169, 97, 0.15);
+    border-radius: 16px;
+    padding: 1.6rem 1.6rem;
+    position: relative;
+    transition: border-color 0.3s ease;
+}
+.action-card:hover { border-color: rgba(201, 169, 97, 0.35); }
+.action-card.priority {
+    border-color: rgba(201, 169, 97, 0.5);
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.08), rgba(201, 169, 97, 0.02));
+}
+.action-tag {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: rgba(201, 169, 97, 0.12);
+    color: var(--gold);
+    border-radius: 50px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    margin-bottom: 0.9rem;
+}
+.action-tag.high {
+    background: rgba(232, 169, 115, 0.12);
+    color: var(--orange);
+}
+.action-card.priority .action-tag {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: #000;
+}
+.action-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+}
+.action-desc {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+.action-impact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(201, 169, 97, 0.12);
+    font-size: 0.82rem;
+}
+.action-impact-lbl { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.7rem; font-weight: 600; }
+.action-impact-val {
+    color: var(--green);
+    font-weight: 800;
+    font-feature-settings: 'tnum' 1;
+    font-size: 1rem;
+}
+
+/* GOAL BOX */
+.goal-box {
+    margin-top: 0;
+    padding: 1.8rem;
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.06), rgba(201, 169, 97, 0.02));
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-radius: 16px;
+}
+.goal-box-title {
+    font-size: 0.78rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.goal-result {
+    font-size: 1.05rem;
+    color: var(--text-white);
+    line-height: 1.9;
+}
+.goal-result strong {
+    color: var(--gold);
+    font-weight: 800;
+    font-feature-settings: 'tnum' 1;
+    font-size: 1.15rem;
+}
+
+.timeframe-summary {
+    margin-top: 1.2rem;
+    padding: 1rem 1.4rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px dashed rgba(201, 169, 97, 0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+.tfs-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.tfs-lbl {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+}
+.tfs-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--gold);
+    font-feature-settings: 'tnum' 1;
+}
+.tfs-val.warn { color: var(--orange); }
+.tfs-val.crit { color: var(--red); }
+
+/* B2B-ICP CARD */
+.icp-card {
+    margin-top: 2rem;
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.08), rgba(201, 169, 97, 0.02));
+    border: 1px solid rgba(201, 169, 97, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+.icp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+}
+.icp-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+.icp-tag {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: #000;
+    border-radius: 50px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+}
+.icp-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-white);
+    letter-spacing: -0.01em;
+    margin-bottom: 0.5rem;
+}
+.icp-headline {
+    font-size: 1.05rem;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+.icp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.icp-block {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(201, 169, 97, 0.15);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+}
+.icp-block-lbl {
+    font-size: 0.7rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.icp-block-val {
+    font-size: 0.95rem;
+    color: var(--text-white);
+    font-weight: 600;
+    line-height: 1.5;
+}
+.icp-reason {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed rgba(201, 169, 97, 0.18);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+.icp-reason strong { color: var(--gold); font-weight: 700; }
+
+/* HARDCORE NOTE */
+.hardcore-note {
+    margin-top: 2rem;
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.05), rgba(0, 0, 0, 0.3));
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-left: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 1.6rem 1.8rem;
+}
+.hardcore-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    background: rgba(201, 169, 97, 0.12);
+    color: var(--gold);
+    border-radius: 50px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    margin-bottom: 0.9rem;
+}
+.hardcore-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-white);
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.01em;
+}
+.hardcore-text {
+    color: #ccc;
+    font-size: 0.95rem;
+    line-height: 1.75;
+}
+.hardcore-text strong {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+/* FOOTER */
+footer {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    border-top: 1px solid rgba(201, 169, 97, 0.08);
+    margin-top: 4rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .top-nav { padding: 1rem 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .nav-badge { display: none; }
+    .section { padding: 5rem 1rem 2rem; }
+    .section.hero-section { padding-top: 7rem; min-height: auto; }
+    .calculator { padding: 1.5rem; border-radius: 20px; }
+    .kpi-value { font-size: 1.5rem; }
+    .hero h1 { font-size: clamp(2.2rem, 9vw, 3.5rem); }
+    .nav-btn { padding: 0.6rem 1rem; font-size: 0.75rem; }
+    .funnel-row { grid-template-columns: 1fr; gap: 0.5rem; }
+    .funnel-stage { min-width: auto; }
+    .funnel-val { text-align: left; }
+    .score-grid { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; }
+    .score-circle { margin: 0 auto; width: 170px; height: 170px; }
+}
+
+/* PRINT / PDF EXPORT */
+@page {
+    size: A4;
+    margin: 14mm 12mm;
+}
+
+@media print {
+    /* Hard-reset aufs Notwendige */
+    html, body {
+        background: #fff !important;
+        color: #1a1a1a !important;
+        font-size: 10pt;
+        line-height: 1.45;
+    }
+    body::before { display: none !important; }
+    .bg-orb, .progress-bar, .top-nav, .hero-section { display: none !important; }
+    .section { padding: 0.5rem 0 0.8rem !important; }
+    section.section:first-of-type { padding-top: 0 !important; }
+    .content { max-width: 100% !important; }
+
+    /* Print-Header: einmal oben auf Seite 1 */
+    .print-header {
+        display: block !important;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #c9a961;
+        page-break-after: avoid;
+    }
+    .print-header-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+    .print-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 22pt;
+        font-weight: 800;
+        color: #1a1a1a !important;
+        margin: 0 0 0.2rem 0;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+    }
+    .print-header .print-sub {
+        font-size: 9pt;
+        color: #666;
+        margin: 0;
+    }
+    .print-header .print-meta {
+        text-align: right;
+        font-size: 8.5pt;
+        color: #666;
+    }
+    .print-header .print-meta strong { color: #c9a961; }
+
+    /* Section-Labels & Headlines auf Print */
+    .section-label {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        font-size: 8pt !important;
+        color: #c9a961 !important;
+        letter-spacing: 0.18em !important;
+        margin-bottom: 0.4rem !important;
+    }
+    .section-label::before { display: none !important; }
+    h2 {
+        font-size: 16pt !important;
+        color: #1a1a1a !important;
+        margin-bottom: 0.4rem !important;
+        page-break-after: avoid;
+    }
+    h2 .gold-text {
+        background: none !important;
+        -webkit-text-fill-color: #c9a961 !important;
+        color: #c9a961 !important;
+    }
+    h2 + .section-sub {
+        font-size: 9pt !important;
+        color: #555 !important;
+        margin-bottom: 0.8rem !important;
+    }
+
+    /* Calculator-Card als helles Print-Layout */
+    .calculator {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        border-radius: 6pt !important;
+        padding: 0.9rem !important;
+        margin: 0.4rem 0 !important;
+        page-break-inside: avoid;
+    }
+    .calculator::before { display: none !important; }
+    .calc-section {
+        margin-bottom: 1rem !important;
+        padding-bottom: 0.8rem !important;
+        border-bottom: 1px solid #e0d8be !important;
+        page-break-inside: avoid;
+    }
+    .calc-section:last-child { border-bottom: none !important; }
+    .calc-num {
+        background: #c9a961 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        width: 22pt !important;
+        height: 22pt !important;
+        font-size: 9pt !important;
+    }
+    .calc-title { font-size: 11pt !important; color: #1a1a1a !important; }
+    .calc-sub { font-size: 8.5pt !important; color: #666 !important; }
+    .calc-header { margin-bottom: 0.7rem !important; }
+
+    /* Input-Felder werden zu lesbaren Werten */
+    .input-label {
+        font-size: 7.5pt !important;
+        color: #c9a961 !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .input-label small { font-size: 7pt !important; color: #888 !important; }
+    .calc-input, .calc-select {
+        background: #fff !important;
+        border: 1px solid #d8cfb8 !important;
+        color: #1a1a1a !important;
+        padding: 0.4rem 0.6rem !important;
+        font-size: 9.5pt !important;
+        border-radius: 3pt !important;
+        box-shadow: none !important;
+    }
+    .calc-input[type="date"]::-webkit-calendar-picker-indicator { display: none !important; }
+    .input-suffix { color: #888 !important; font-size: 8pt !important; }
+    .inputs-grid { gap: 0.5rem 0.8rem !important; }
+
+    /* Derived-Quote-Row */
+    .derived-quote-row {
+        background: #f5efe0 !important;
+        border: 1px solid #e0d8be !important;
+        padding: 0.6rem 0.9rem !important;
+        margin-top: 0.6rem !important;
+        gap: 0.8rem 1.5rem !important;
+    }
+    .derived-quote-label { font-size: 7pt !important; }
+    .derived-quote-val { font-size: 11pt !important; color: #c9a961 !important; }
+
+    /* KPI-Grid: kompakter, helles Layout */
+    .kpi-grid {
+        gap: 0.5rem !important;
+        page-break-inside: avoid;
+    }
+    .kpi-card {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        border-radius: 4pt !important;
+        padding: 0.7rem 0.9rem !important;
+        page-break-inside: avoid;
+    }
+    .kpi-card::before { display: none !important; }
+    .kpi-card.accent {
+        background: #f5efe0 !important;
+        border-color: #c9a961 !important;
+    }
+    .kpi-label { font-size: 7.5pt !important; color: #888 !important; margin-bottom: 0.3rem !important; }
+    .kpi-card.accent .kpi-label { color: #8a7038 !important; }
+    .kpi-value {
+        font-size: 14pt !important;
+        color: #1a1a1a !important;
+    }
+    .kpi-card.accent .kpi-value {
+        background: none !important;
+        -webkit-text-fill-color: #c9a961 !important;
+        color: #c9a961 !important;
+    }
+    .kpi-sub { font-size: 8pt !important; color: #666 !important; }
+
+    /* Score-Card */
+    .score-card {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        padding: 1rem !important;
+        page-break-inside: avoid;
+    }
+    .score-card::before { display: none !important; }
+    .score-circle { width: 100pt !important; height: 100pt !important; }
+    .score-circle .arc { stroke: #c9a961 !important; }
+    .score-circle .track { stroke: #e0d8be !important; }
+    .score-num {
+        background: none !important;
+        -webkit-text-fill-color: #c9a961 !important;
+        color: #c9a961 !important;
+        font-size: 26pt !important;
+    }
+    .score-num.warn { -webkit-text-fill-color: #d68a3a !important; color: #d68a3a !important; }
+    .score-num.crit { -webkit-text-fill-color: #c84b4b !important; color: #c84b4b !important; }
+    .score-num.top { -webkit-text-fill-color: #4ca266 !important; color: #4ca266 !important; }
+    .score-of { color: #888 !important; font-size: 7.5pt !important; }
+    .score-headline { color: #1a1a1a !important; font-size: 13pt !important; }
+    .score-desc { color: #555 !important; font-size: 9.5pt !important; }
+    .score-title { color: #c9a961 !important; font-size: 7.5pt !important; }
+    .score-grid { gap: 1.2rem !important; }
+
+    /* Goal-Box */
+    .goal-box {
+        background: #f5efe0 !important;
+        border: 1px solid #c9a961 !important;
+        padding: 0.9rem !important;
+        page-break-inside: avoid;
+    }
+    .goal-box-title { color: #8a7038 !important; font-size: 8pt !important; }
+    .goal-result { color: #1a1a1a !important; font-size: 9.5pt !important; line-height: 1.55 !important; }
+    .goal-result strong { color: #c9a961 !important; }
+    .timeframe-summary {
+        background: #fff !important;
+        border: 1px dashed #d8cfb8 !important;
+        padding: 0.5rem 0.8rem !important;
+    }
+    .tfs-lbl { font-size: 7pt !important; }
+    .tfs-val { font-size: 10pt !important; color: #c9a961 !important; }
+
+    /* Cadence-Karten */
+    .cadence-card {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        padding: 0.7rem 0.9rem !important;
+        page-break-inside: avoid;
+    }
+    .cadence-card.gold {
+        background: #f5efe0 !important;
+        border-color: #c9a961 !important;
+    }
+    .cadence-period { color: #c9a961 !important; font-size: 7.5pt !important; }
+    .cadence-row .lbl { color: #666 !important; }
+    .cadence-row .val { color: #1a1a1a !important; }
+
+    /* Funnel */
+    .funnel-wrap {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        padding: 0.9rem !important;
+        page-break-inside: avoid;
+    }
+    .funnel-bar { background: #c9a961 !important; box-shadow: none !important; }
+    .funnel-bar-wrap { background: #e8e0c8 !important; }
+    .funnel-name { color: #c9a961 !important; font-size: 7.5pt !important; }
+    .funnel-val { color: #1a1a1a !important; font-size: 9pt !important; }
+    .funnel-val small { color: #888 !important; font-size: 7pt !important; }
+    .funnel-dot { background: #c9a961 !important; box-shadow: none !important; }
+
+    /* Maßnahmen + ICP */
+    .icp-card {
+        background: #f5efe0 !important;
+        border: 1px solid #c9a961 !important;
+        padding: 1rem !important;
+        page-break-inside: avoid;
+    }
+    .icp-card::before { display: none !important; }
+    .icp-tag {
+        background: #c9a961 !important;
+        color: #fff !important;
+        font-size: 7pt !important;
+    }
+    .icp-title { color: #1a1a1a !important; font-size: 12pt !important; }
+    .icp-headline { color: #c9a961 !important; font-size: 10pt !important; }
+    .icp-block {
+        background: #fff !important;
+        border: 1px solid #d8cfb8 !important;
+        padding: 0.6rem 0.8rem !important;
+    }
+    .icp-block-lbl { color: #c9a961 !important; font-size: 7pt !important; }
+    .icp-block-val { color: #1a1a1a !important; font-size: 8.5pt !important; }
+    .icp-reason { color: #555 !important; font-size: 8.5pt !important; }
+    .icp-reason strong { color: #c9a961 !important; }
+
+    .actions-grid { gap: 0.5rem !important; }
+    .action-card {
+        background: #fafaf6 !important;
+        border: 1px solid #d8cfb8 !important;
+        padding: 0.7rem 0.9rem !important;
+        page-break-inside: avoid;
+    }
+    .action-card.priority {
+        background: #f5efe0 !important;
+        border-color: #c9a961 !important;
+    }
+    .action-tag {
+        background: #e8e0c8 !important;
+        color: #8a7038 !important;
+        font-size: 7pt !important;
+    }
+    .action-card.priority .action-tag {
+        background: #c9a961 !important;
+        color: #fff !important;
+    }
+    .action-title { color: #1a1a1a !important; font-size: 10pt !important; }
+    .action-desc { color: #555 !important; font-size: 8.5pt !important; }
+    .action-impact-lbl { color: #888 !important; font-size: 7pt !important; }
+    .action-impact-val { color: #4ca266 !important; font-size: 9pt !important; }
+
+    /* Hardcore-Note */
+    .hardcore-note {
+        background: #f5efe0 !important;
+        border: 1px solid #c9a961 !important;
+        border-left: 3px solid #c9a961 !important;
+        padding: 0.9rem 1rem !important;
+        page-break-inside: avoid;
+    }
+    .hardcore-tag {
+        background: #e8e0c8 !important;
+        color: #8a7038 !important;
+        font-size: 7pt !important;
+    }
+    .hardcore-title { color: #1a1a1a !important; font-size: 11pt !important; }
+    .hardcore-text { color: #555 !important; font-size: 9pt !important; }
+    .hardcore-text strong { color: #c9a961 !important; }
+
+    /* Footer */
+    footer {
+        margin-top: 1.5rem !important;
+        padding: 0.8rem 0 0 !important;
+        border-top: 1px solid #d8cfb8 !important;
+        color: #888 !important;
+        font-size: 7.5pt !important;
+    }
+
+    /* Page-Break-Verhalten */
+    .calc-section, .kpi-grid, .score-card, .icp-card, .action-card,
+    .hardcore-note, .funnel-wrap, .cadence-grid {
+        page-break-inside: avoid;
+    }
+
+    /* Anker zwischen Sections */
+    section.section + section.section { page-break-before: auto; }
+
+    /* Links sauber drucken */
+    a { color: #c9a961 !important; text-decoration: none !important; }
+}
+
+.print-header { display: none; }
+</style>
+</head>
+<body>
+
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8a7038"/>
+            <stop offset="50%" stop-color="#c9a961"/>
+            <stop offset="100%" stop-color="#e8c573"/>
+        </linearGradient>
+    </defs>
+</svg>
+
+<nav class="top-nav">
+    <a href="https://www.langconsulting.de" target="_blank" rel="noopener" class="logo-link">
+        <img src="https://cdn.prod.website-files.com/66058614773c08ca255f28f0/662a2886c0cec9cf0e98029b_lang-gold-logo.svg" class="logo-img" alt="Lang Consulting">
+    </a>
+    <div class="nav-right">
+        <div class="nav-badge">Opener · Provisionsrechner</div>
+        <button class="nav-btn secondary" id="resetBtn" title="Auf Standardwerte zurücksetzen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Reset
+        </button>
+        <button class="nav-btn" id="exportBtn" title="Als PDF speichern oder drucken">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            PDF Export
+        </button>
+    </div>
+</nav>
+
+<!-- Print-Header (nur sichtbar im Druck) -->
+<div class="print-header">
+    <div class="print-header-inner">
+        <div>
+            <h1>Opener-Provisionsrechner</h1>
+            <p class="print-sub">Lang Consulting · 3-Stufen-Vertrieb · Provision pro Monat</p>
+        </div>
+        <div class="print-meta">
+            Erstellt am <strong id="printDate">—</strong><br>
+            langconsulting.de
+        </div>
+    </div>
+</div>
+
+<section class="section hero-section">
+    <div class="content">
+        <div class="hero">
+            <div class="hero-badge">3-Stufen-Vertrieb · Provision pro Monat</div>
+            <h1>
+                <span class="line1">Diesen Monat.</span>
+                <span class="line2">Dein Gehalt.</span>
+            </h1>
+            <p class="subtitle">
+                Trag deine aktuellen Werte ein und sieh in Echtzeit, was du in diesem Monat verdienst — und was du leisten musst, um dein Zielgehalt zu erreichen.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- DEIN MONAT -->
+<section class="section" style="padding-top: 2rem;">
+    <div class="content">
+        <div class="section-label">Dein aktueller Monat</div>
+        <h2>Wie <span class="gold-text">läuft dieser Monat?</span></h2>
+        <p class="section-sub">Trag deine echten Werte ein. Anwahlen, Erreicht, Settings. Alles andere errechnet sich automatisch.</p>
+
+        <div class="calculator">
+
+            <!-- 1 SOFT-SKILL -->
+            <div class="calc-section">
+                <div class="calc-header">
+                    <div class="calc-num">1</div>
+                    <div>
+                        <div class="calc-title">Anwahl-Aktivität & Erreichbarkeit</div>
+                        <div class="calc-sub">Wie viele Anwahlen machst du im Monat — und mit wem sprichst du wirklich?</div>
+                    </div>
+                </div>
+
+                <div class="inputs-grid">
+                    <div>
+                        <label class="input-label" for="istAnwahlen">
+                            Anwahlen / Monat
+                            <small>Gesamtversuche, egal ob jemand drangeht oder nicht</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="istAnwahlen" class="calc-input" value="500" min="0" step="10">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="istErreicht">
+                            Davon erreicht
+                            <small>Anzahl tatsächlicher Gespräche mit dem Lead</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="istErreicht" class="calc-input" value="150" min="0" step="5">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="istSettings">
+                            Settings gelegt
+                            <small>Anzahl tatsächlich vereinbarter Setting-Termine</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="istSettings" class="calc-input" value="40" min="0" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="derived-quote-row">
+                    <div class="derived-quote-item">
+                        <div class="derived-quote-label">Erreichbarkeitsquote</div>
+                        <div class="derived-quote-val" id="qErr">30,0 %</div>
+                    </div>
+                    <div class="derived-quote-item">
+                        <div class="derived-quote-label">Erreicht → Setting</div>
+                        <div class="derived-quote-val" id="qErrToSet">26,7 %</div>
+                    </div>
+                    <div class="derived-quote-item">
+                        <div class="derived-quote-label">Anwahl → Setting</div>
+                        <div class="derived-quote-val" id="qAnwToSet">8,0 %</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 DOWNSTREAM -->
+            <div class="calc-section">
+                <div class="calc-header">
+                    <div class="calc-num">2</div>
+                    <div>
+                        <div class="calc-title">Downstream-Quoten · Setter & Closer</div>
+                        <div class="calc-sub">Was passiert nach dir mit deinen Settings? Diese Werte hast du nicht in der Hand — aber sie wirken auf dein Gehalt</div>
+                    </div>
+                </div>
+
+                <div class="inputs-grid">
+                    <div>
+                        <label class="input-label" for="setToClose">
+                            Setting → Closing
+                            <small>Anteil der Settings, die ins Closing gelegt werden</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="setToClose" class="calc-input has-suffix" value="30" min="0" max="100" step="1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="closingShow">
+                            Show-Up Closing
+                            <small>Anteil der Closings, bei denen der Kunde erscheint</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="closingShow" class="calc-input has-suffix" value="80" min="0" max="100" step="1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="closeRate">
+                            Close-Rate
+                            <small>Anteil der erschienenen Closings, die geclosed werden</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="closeRate" class="calc-input has-suffix" value="40" min="0" max="100" step="1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 VERTRAG -->
+            <div class="calc-section">
+                <div class="calc-header">
+                    <div class="calc-num">3</div>
+                    <div>
+                        <div class="calc-title">Typischer Vertrag</div>
+                        <div class="calc-sub">Was kommt vom Kunden in den ersten 30 Tagen rein? Genau darauf fließt deine Provision</div>
+                    </div>
+                </div>
+
+                <div class="inputs-grid">
+                    <div>
+                        <label class="input-label" for="vertragssumme">
+                            Vertragssumme gesamt
+                            <small>Netto-Gesamtvolumen eines typischen Abschlusses</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="vertragssumme" class="calc-input has-suffix" value="12000" min="0" step="100">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="laufzeit">
+                            Laufzeit
+                            <small>Über wie viele Monate zahlt der Kunde?</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="laufzeit" class="calc-input has-suffix" value="12" min="1" max="60" step="1">
+                            <span class="input-suffix">Monate</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="monatsrate">
+                            Monatsrate · 1. Rate
+                            <small>Was kommt pro Monat (in den 30 Tagen) — manuell überschreibbar</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="monatsrate" class="calc-input has-suffix" value="1000" min="0" step="50">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="einmalzahlerCashflow">
+                            Einmalzahler-Cashflow
+                            <small>Summe aller Verträge, die diesen Monat komplett im 1. Monat bezahlt wurden (volle Vertragssumme statt Rate)</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="einmalzahlerCashflow" class="calc-input has-suffix" value="0" min="0" step="500">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="commission">
+                            Commission
+                            <small>Standard: 2 % vom Cashflow</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="commission" class="calc-input has-suffix" value="2" min="0" max="100" step="0.1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="fixum">
+                            Fixgehalt (optional)
+                            <small>Grundgehalt pro Monat, falls vorhanden</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="fixum" class="calc-input has-suffix" value="0" min="0" step="50">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="ueberstunden">
+                            Überstunden / Monat
+                            <small>Zusätzliche Stunden über die Regelarbeitszeit hinaus</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="ueberstunden" class="calc-input has-suffix" value="0" min="0" max="200" step="1">
+                            <span class="input-suffix">h</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label" for="ueberstundenlohn">
+                            Lohn pro Überstunde
+                            <small>Vereinbarter Stundensatz für Mehrarbeit</small>
+                        </label>
+                        <div class="input-wrap">
+                            <input type="number" id="ueberstundenlohn" class="calc-input has-suffix" value="0" min="0" step="1">
+                            <span class="input-suffix">€/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- IST KPIs -->
+<section class="section" style="padding-top: 1rem;">
+    <div class="content">
+        <div class="section-label">Dieser Monat · Provision</div>
+        <h2>Das verdienst du <span class="gold-text">diesen Monat</span></h2>
+        <p class="section-sub">Live-Berechnung aus deinen Eingaben. Cashflow = Anzahl neue Verträge × Monatsrate. Provision = Cashflow × dein Commission-Satz.</p>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Funnel-Conversion</div>
+                <div class="kpi-value" id="kpiIstConv">— %</div>
+                <div class="kpi-sub">Anwahl bis Abschluss</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Neue Kunden / Monat</div>
+                <div class="kpi-value" id="kpiIstKunden">—</div>
+                <div class="kpi-sub" id="kpiIstKundenSub">Geclosede Abschlüsse aus deinen Settings</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Cashflow diesen Monat</div>
+                <div class="kpi-value" id="kpiCashflow">— €</div>
+                <div class="kpi-sub">Neue Verträge × Monatsrate</div>
+            </div>
+            <div class="kpi-card accent">
+                <div class="kpi-label">Dein Gehalt diesen Monat</div>
+                <div class="kpi-value" id="kpiIstGehalt">— €</div>
+                <div class="kpi-sub" id="kpiIstGehaltSub">Fixum + Provision + Überstunden</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Provision pro Setting</div>
+                <div class="kpi-value" id="kpiIstPerTermin">— €</div>
+                <div class="kpi-sub">durchschnittlich pro gelegtem Setting</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ZIEL-PLANER -->
+<section class="section" style="padding-top: 2rem;">
+    <div class="content">
+        <div class="section-label">Zielgehalt · Plan</div>
+        <h2>Wann willst du <span class="gold-text">wie viel</span> verdienen?</h2>
+        <p class="section-sub">Setz dein Zielgehalt und einen Zeitrahmen. Wir rechnen rückwärts, was das pro Tag, Woche und Monat bedeutet.</p>
+
+        <div class="goal-box" style="margin-bottom: 2rem;">
+            <div class="goal-box-title">Dein Ziel · Zeitraum</div>
+            <div class="inputs-grid">
+                <div>
+                    <label class="input-label" for="zielgehalt">
+                        Zielgehalt pro Monat
+                        <small>Was willst du am Ende verdienen?</small>
+                    </label>
+                    <div class="input-wrap">
+                        <input type="number" id="zielgehalt" class="calc-input has-suffix" value="5000" min="0" step="100">
+                        <span class="input-suffix">€</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="input-label" for="zielStart">
+                        Startdatum
+                        <small>Ab wann beginnst du den Push?</small>
+                    </label>
+                    <div class="input-wrap">
+                        <input type="date" id="zielStart" class="calc-input">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="input-label" for="zielEnd">
+                        Enddatum · Zielmonat
+                        <small>Wann musst du das Gehalt verdienen?</small>
+                    </label>
+                    <div class="input-wrap">
+                        <input type="date" id="zielEnd" class="calc-input">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="input-label" for="arbeitstage">
+                        Arbeitstage / Woche
+                        <small>Übliche Anwahl-Tage</small>
+                    </label>
+                    <div class="input-wrap">
+                        <select id="arbeitstage" class="calc-select">
+                            <option value="4">4 Tage</option>
+                            <option value="5" selected>5 Tage</option>
+                            <option value="6">6 Tage</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeframe-summary">
+                <div class="tfs-item">
+                    <div class="tfs-lbl">Gesamt-Zeitraum</div>
+                    <div class="tfs-val" id="tfsRange">—</div>
+                </div>
+                <div class="tfs-item">
+                    <div class="tfs-lbl">Kalenderwochen</div>
+                    <div class="tfs-val" id="tfsWeeks">—</div>
+                </div>
+                <div class="tfs-item">
+                    <div class="tfs-lbl">Arbeitstage gesamt</div>
+                    <div class="tfs-val" id="tfsWorkdays">—</div>
+                </div>
+            </div>
+
+            <div class="goal-result" style="margin-top: 1.5rem;" id="goalResult">
+                Berechnung läuft …
+            </div>
+        </div>
+
+        <!-- SCORE GAUGE -->
+        <div class="score-card" id="scoreCard">
+            <div class="score-grid">
+                <div class="score-circle">
+                    <svg viewBox="0 0 200 200">
+                        <circle class="track" cx="100" cy="100" r="85"/>
+                        <circle class="arc" id="scoreArc" cx="100" cy="100" r="85" stroke-dasharray="0 534" />
+                    </svg>
+                    <div class="score-center">
+                        <div class="score-num" id="scoreNum">—</div>
+                        <div class="score-of">/ 10 Score</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="score-title">Zielkurs-Bewertung</div>
+                    <div class="score-headline" id="scoreHeadline">Trag deine Zahlen ein</div>
+                    <div class="score-desc" id="scoreDesc">Sobald aktueller Monat und Ziel gesetzt sind, bekommst du hier eine ehrliche Einschätzung — und siehst, wie viele Anwahlen, Erreichungen und Settings du wirklich schaffen musst.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CADENCE -->
+        <div style="margin-top: 2rem;">
+            <div style="font-size: 0.78rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600; margin-bottom: 1rem;">Was du dafür leisten musst</div>
+            <div class="cadence-grid">
+                <div class="cadence-card gold">
+                    <div class="cadence-period">Pro Monat</div>
+                    <div class="cadence-rows">
+                        <div class="cadence-row"><span class="lbl">Anwahlen</span><span class="val" id="cadMAnw">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Erreicht</span><span class="val" id="cadMErr">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Settings gelegt</span><span class="val" id="cadMSet">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Neue Kunden</span><span class="val" id="cadMKnd">—</span></div>
+                    </div>
+                </div>
+                <div class="cadence-card">
+                    <div class="cadence-period">Pro Woche</div>
+                    <div class="cadence-rows">
+                        <div class="cadence-row"><span class="lbl">Anwahlen</span><span class="val" id="cadWAnw">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Erreicht</span><span class="val" id="cadWErr">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Settings gelegt</span><span class="val" id="cadWSet">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Neue Kunden</span><span class="val" id="cadWKnd">—</span></div>
+                    </div>
+                </div>
+                <div class="cadence-card">
+                    <div class="cadence-period">Pro Tag</div>
+                    <div class="cadence-rows">
+                        <div class="cadence-row"><span class="lbl">Anwahlen</span><span class="val" id="cadDAnw">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Erreicht</span><span class="val" id="cadDErr">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Settings gelegt</span><span class="val" id="cadDSet">—</span></div>
+                        <div class="cadence-row"><span class="lbl">Neue Kunden</span><span class="val" id="cadDKnd">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ZIEL-FUNNEL -->
+        <div class="funnel-wrap" id="funnelViz" style="margin-top: 2rem;"></div>
+    </div>
+</section>
+
+<!-- MASSNAHMEN -->
+<section class="section" style="padding-top: 1rem;">
+    <div class="content">
+        <div class="section-label">Maßnahmen · Hebel</div>
+        <h2>Was du <span class="gold-text">jetzt drehen</span> kannst</h2>
+        <p class="section-sub">Konkrete Hebel — sortiert nach Wirkung. Die ersten Karten haben den größten Effekt auf deine Provision diesen Monat.</p>
+
+        <!-- B2B ICP -->
+        <div class="icp-card" id="icpCard">
+            <div class="icp-header">
+                <div class="icp-tag">Zielgruppe · ICP</div>
+            </div>
+            <div class="icp-title">Deine empfohlene B2B-Zielgruppe</div>
+            <div class="icp-headline" id="icpHeadline">Wird basierend auf deinem Vertragsvolumen berechnet …</div>
+            <div class="icp-grid" id="icpGrid"></div>
+            <div class="icp-reason" id="icpReason"></div>
+        </div>
+
+        <div class="actions-grid" id="actionsGrid" style="margin-top: 2rem;"></div>
+
+        <!-- HARDCORE -->
+        <div class="hardcore-note">
+            <div class="hardcore-tag">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Realitäts-Check
+            </div>
+            <div class="hardcore-title">Top-Vertriebler-Gehälter kommen nicht aus 9-to-5</div>
+            <div class="hardcore-text">
+                Wer im Vertrieb dauerhaft <strong>5.000 €+</strong> oder mehr verdienen will, kommt selten ohne <strong>Mehrarbeit</strong> dahin. In der Aufbauphase ist es bei den Top-Performern Standard, <strong>regelmäßig Überstunden zu machen</strong> und auch <strong>am Wochenende</strong> Termine vorzubereiten, Listen zu schärfen oder Folge-Calls zu führen. Das ist keine Ausnahme, das ist der Weg.
+                <br><br>
+                Wer früher mehr will, drückt früher mehr. Plane die Mehrarbeit aktiv mit deinem Umfeld ein, statt sie als Last zu sehen. Top-Verkäufer sehen Wochenend-Calls als Wettbewerbsvorteil — viele Entscheider sind Samstag erreichbarer als Dienstag 14:00.
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    Lang Consulting · Opener-Provisionsrechner · alle Werte basierend auf deinen Eingaben, Provision vor Steuern
+</footer>
+
+<script>
+// ============ ELEMENT REFS ============
+const $ = id => document.getElementById(id);
+const inputs = {
+    istAnwahlen: $('istAnwahlen'),
+    istErreicht: $('istErreicht'),
+    istSettings: $('istSettings'),
+    setToClose: $('setToClose'),
+    closingShow: $('closingShow'),
+    closeRate: $('closeRate'),
+    vertragssumme: $('vertragssumme'),
+    laufzeit: $('laufzeit'),
+    monatsrate: $('monatsrate'),
+    einmalzahlerCashflow: $('einmalzahlerCashflow'),
+    commission: $('commission'),
+    fixum: $('fixum'),
+    ueberstunden: $('ueberstunden'),
+    ueberstundenlohn: $('ueberstundenlohn'),
+    zielgehalt: $('zielgehalt'),
+    zielStart: $('zielStart'),
+    zielEnd: $('zielEnd'),
+    arbeitstage: $('arbeitstage')
+};
+
+function todayISO() {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+}
+function plusMonthsISO(months) {
+    const d = new Date();
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().slice(0, 10);
+}
+
+const DEFAULTS = {
+    istAnwahlen: 500, istErreicht: 150, istSettings: 40,
+    setToClose: 30, closingShow: 80, closeRate: 40,
+    vertragssumme: 12000, laufzeit: 12, monatsrate: 1000, einmalzahlerCashflow: 0,
+    commission: 2, fixum: 0,
+    ueberstunden: 0, ueberstundenlohn: 0,
+    zielgehalt: 5000, arbeitstage: 5,
+    zielStart: todayISO(),
+    zielEnd: plusMonthsISO(6)
+};
+
+if (inputs.zielStart && !inputs.zielStart.value) inputs.zielStart.value = DEFAULTS.zielStart;
+if (inputs.zielEnd && !inputs.zielEnd.value) inputs.zielEnd.value = DEFAULTS.zielEnd;
+
+// ============ FORMATTERS ============
+const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const euroFine = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+const num = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const num0 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+const pctFmt = (v) => `${(v * 100).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} %`;
+const dateFmt = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+const dateFmtShort = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+// ============ DATE HELPERS ============
+function parseDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+}
+function diffMonths(start, end) {
+    if (!start || !end) return 0;
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return Math.max(0, months + (end.getDate() >= start.getDate() ? 0 : -1));
+}
+function diffDays(start, end) {
+    if (!start || !end) return 0;
+    return Math.max(0, Math.round((end - start) / 86400000));
+}
+function workdaysInRange(start, end, daysPerWeek) {
+    if (!start || !end || end <= start) return 0;
+    const totalDays = diffDays(start, end);
+    return Math.round(totalDays * (daysPerWeek / 7));
+}
+
+// ============ READ ============
+function readVals() {
+    const start = parseDate(inputs.zielStart ? inputs.zielStart.value : null);
+    const end = parseDate(inputs.zielEnd ? inputs.zielEnd.value : null);
+    const arbeitstage = parseInt(inputs.arbeitstage.value) || 5;
+    const monate = (start && end) ? diffMonths(start, end) : 6;
+    return {
+        istAnwahlen: Math.max(0, parseFloat(inputs.istAnwahlen.value) || 0),
+        istErreicht: Math.max(0, parseFloat(inputs.istErreicht.value) || 0),
+        istSettings: Math.max(0, parseFloat(inputs.istSettings.value) || 0),
+        setQ: Math.max(0, Math.min(100, parseFloat(inputs.setToClose.value) || 0)) / 100,
+        showQ: Math.max(0, Math.min(100, parseFloat(inputs.closingShow.value) || 0)) / 100,
+        closeQ: Math.max(0, Math.min(100, parseFloat(inputs.closeRate.value) || 0)) / 100,
+        summe: Math.max(0, parseFloat(inputs.vertragssumme.value) || 0),
+        laufzeit: Math.max(1, parseInt(inputs.laufzeit.value) || 1),
+        monatsrateManual: Math.max(0, parseFloat(inputs.monatsrate.value) || 0),
+        einmalCashflow: Math.max(0, parseFloat(inputs.einmalzahlerCashflow.value) || 0),
+        comm: Math.max(0, parseFloat(inputs.commission.value) || 0) / 100,
+        fixum: Math.max(0, parseFloat(inputs.fixum.value) || 0),
+        ueberstunden: Math.max(0, parseFloat(inputs.ueberstunden.value) || 0),
+        ueberstundenlohn: Math.max(0, parseFloat(inputs.ueberstundenlohn.value) || 0),
+        ziel: Math.max(0, parseFloat(inputs.zielgehalt.value) || 0),
+        zielStart: start,
+        zielEnd: end,
+        zielMonate: Math.max(1, monate),
+        arbeitstage
+    };
+}
+
+// ============ DERIVED IST QUOTES ============
+function deriveIstQuotes(v) {
+    const erreicht = Math.min(v.istErreicht, v.istAnwahlen);
+    const settings = Math.min(v.istSettings, erreicht);
+    const errQ = v.istAnwahlen > 0 ? erreicht / v.istAnwahlen : 0;
+    const setFromErr = erreicht > 0 ? settings / erreicht : 0;
+    const settingPerAnwahl = v.istAnwahlen > 0 ? settings / v.istAnwahlen : 0;
+    return { errQ, setFromErr, settingPerAnwahl, erreicht, settings };
+}
+
+// ============ FUNNEL — aktueller Monat ============
+function funnel(anwahlen, q, v) {
+    const erreicht = anwahlen * q.errQ;
+    const settings = erreicht * q.setFromErr;
+    const inClosing = settings * v.setQ;
+    const erschienen = inClosing * v.showQ;
+    const geclosed = erschienen * v.closeQ;
+
+    // Monatsrate: manuell hat Vorrang vor Auto
+    const autoMonatsrate = v.laufzeit > 0 ? v.summe / v.laufzeit : 0;
+    const monatsrate = (v.monatsrateManual && v.monatsrateManual > 0) ? v.monatsrateManual : autoMonatsrate;
+
+    // Cashflow diesen Monat = Ratenzahler-Cashflow (geclosed × Monatsrate) + Einmalzahler-Cashflow (manuell)
+    const cashflowRaten = geclosed * monatsrate;
+    const cashflowEinmal = v.einmalCashflow || 0;
+    const cashflow = cashflowRaten + cashflowEinmal;
+
+    const provision = cashflow * v.comm;
+    const ueberstundenpay = (v.ueberstunden || 0) * (v.ueberstundenlohn || 0);
+    const gehalt = v.fixum + provision + ueberstundenpay;
+
+    const perDeal = monatsrate * v.comm; // Provision pro Ratenzahler-Abschluss in Monat 1
+    const perTermin = settings > 0 ? (geclosed * perDeal) / settings : 0;
+    const fullConv = anwahlen > 0 ? geclosed / anwahlen : 0;
+
+    return {
+        anwahlen, erreicht, settings, inClosing, erschienen, geclosed,
+        monatsrate, cashflow, cashflowRaten, cashflowEinmal,
+        provision, ueberstundenpay, gehalt,
+        perDeal, perTermin, fullConv
+    };
+}
+
+// Solve: how many anwahlen needed to reach gehalt = ziel?
+function solveAnwahlenForZiel(ziel, q, v) {
+    const autoMonatsrate = v.laufzeit > 0 ? v.summe / v.laufzeit : 0;
+    const monatsrate = (v.monatsrateManual && v.monatsrateManual > 0) ? v.monatsrateManual : autoMonatsrate;
+    const ratePerAnwahl = q.errQ * q.setFromErr * v.setQ * v.showQ * v.closeQ * monatsrate * v.comm;
+    if (ratePerAnwahl <= 0) return null;
+    const ueberstundenpay = (v.ueberstunden || 0) * (v.ueberstundenlohn || 0);
+    const einmalProvision = (v.einmalCashflow || 0) * v.comm;
+    const needed = ziel - v.fixum - ueberstundenpay - einmalProvision;
+    if (needed <= 0) return 0;
+    return needed / ratePerAnwahl;
+}
+
+// ============ RENDER QUOTES ============
+function renderIstQuotes(q) {
+    $('qErr').textContent = pctFmt(q.errQ);
+    $('qErrToSet').textContent = pctFmt(q.setFromErr);
+    $('qAnwToSet').textContent = pctFmt(q.settingPerAnwahl);
+}
+
+// ============ RENDER KPIs ============
+function renderIstKPIs(istR) {
+    $('kpiIstConv').textContent = pctFmt(istR.fullConv);
+    $('kpiIstKunden').textContent = num.format(istR.geclosed);
+    $('kpiIstKundenSub').textContent = istR.geclosed >= 1
+        ? `≈ 1 Kunde alle ${num0.format(30 / istR.geclosed)} Tage`
+        : `≈ 1 Kunde alle ${num.format(1/Math.max(istR.geclosed, 0.001))} Monate`;
+
+    $('kpiCashflow').textContent = euro.format(istR.cashflow);
+
+    let subText = `${euro.format(parseFloat(inputs.fixum.value) || 0)} Fix · ${euro.format(istR.provision)} Provision`;
+    if (istR.ueberstundenpay > 0) {
+        subText += ` · ${euro.format(istR.ueberstundenpay)} Überstunden`;
+    }
+    $('kpiIstGehalt').textContent = euro.format(istR.gehalt);
+    $('kpiIstGehaltSub').textContent = subText;
+    $('kpiIstPerTermin').textContent = istR.perTermin < 10 ? euroFine.format(istR.perTermin) : euro.format(istR.perTermin);
+}
+
+// ============ TIMEFRAME ============
+function renderTimeframeSummary(v) {
+    if (!v.zielStart || !v.zielEnd || v.zielEnd <= v.zielStart) {
+        $('tfsRange').textContent = '—';
+        $('tfsRange').className = 'tfs-val crit';
+        $('tfsWeeks').textContent = '—';
+        $('tfsWorkdays').textContent = '—';
+        return;
+    }
+    const totalDays = diffDays(v.zielStart, v.zielEnd);
+    const totalWeeks = totalDays / 7;
+    const totalWorkdays = workdaysInRange(v.zielStart, v.zielEnd, v.arbeitstage);
+    const months = v.zielMonate;
+    $('tfsRange').textContent = `${months} Monat${months === 1 ? '' : 'e'} · ${totalDays} Tage`;
+    $('tfsRange').className = 'tfs-val';
+    $('tfsWeeks').textContent = num.format(totalWeeks);
+    $('tfsWorkdays').textContent = num0.format(totalWorkdays);
+}
+
+// ============ GOAL ============
+function renderGoalAndCadence(q, v, istR) {
+    const neededAnwahlen = solveAnwahlenForZiel(v.ziel, q, v);
+    const goalEl = $('goalResult');
+
+    if (neededAnwahlen === null) {
+        goalEl.innerHTML = `Mindestens eine deiner Quoten ist 0 — wir können nichts hochrechnen. Trag erst echte Werte ein.`;
+        clearCadence();
+        return null;
+    }
+    if (neededAnwahlen === 0) {
+        goalEl.innerHTML = `Dein Ziel <strong>${euro.format(v.ziel)}</strong> ist allein durch Fixum + Überstunden erreicht — keine Anwahlen nötig.`;
+        clearCadence();
+        return { neededAnwahlen: 0, neededGoalR: null };
+    }
+
+    const goalR = funnel(neededAnwahlen, q, v);
+
+    const wochenProMonat = 4.33;
+    const tageProMonat = v.arbeitstage * wochenProMonat;
+
+    const cadM = goalR;
+    const cadW = {
+        anwahlen: cadM.anwahlen / wochenProMonat,
+        erreicht: cadM.erreicht / wochenProMonat,
+        settings: cadM.settings / wochenProMonat,
+        geclosed: cadM.geclosed / wochenProMonat
+    };
+    const cadD = {
+        anwahlen: cadM.anwahlen / tageProMonat,
+        erreicht: cadM.erreicht / tageProMonat,
+        settings: cadM.settings / tageProMonat,
+        geclosed: cadM.geclosed / tageProMonat
+    };
+
+    $('cadMAnw').textContent = num0.format(cadM.anwahlen);
+    $('cadMErr').textContent = num0.format(cadM.erreicht);
+    $('cadMSet').textContent = num0.format(cadM.settings);
+    $('cadMKnd').textContent = num.format(cadM.geclosed);
+
+    $('cadWAnw').textContent = num0.format(cadW.anwahlen);
+    $('cadWErr').textContent = num0.format(cadW.erreicht);
+    $('cadWSet').textContent = num.format(cadW.settings);
+    $('cadWKnd').textContent = num.format(cadW.geclosed);
+
+    $('cadDAnw').textContent = num0.format(cadD.anwahlen);
+    $('cadDErr').textContent = num.format(cadD.erreicht);
+    $('cadDSet').textContent = num.format(cadD.settings);
+    $('cadDKnd').textContent = cadD.geclosed < 0.01 ? '< 0,01' : num.format(cadD.geclosed);
+
+    const istAnwahlen = v.istAnwahlen;
+    const deltaAnw = neededAnwahlen - istAnwahlen;
+    let deltaText = '';
+    if (Math.abs(deltaAnw) < istAnwahlen * 0.05) {
+        deltaText = `Du bist mit deiner aktuellen Anwahl-Aktivität bereits sehr nah dran.`;
+    } else if (deltaAnw > 0) {
+        const factor = neededAnwahlen / Math.max(istAnwahlen, 1);
+        deltaText = `Das ist <strong>${num.format(factor)}×</strong> deine aktuelle Aktivität (${num0.format(istAnwahlen)} → ${num0.format(neededAnwahlen)} Anwahlen pro Monat).`;
+    } else {
+        deltaText = `Du machst aktuell schon mehr Anwahlen als nötig (${num0.format(istAnwahlen)} statt ${num0.format(neededAnwahlen)}). Wenn dein Funnel hält, schaffst du dein Ziel.`;
+    }
+
+    let timeframeText = '';
+    if (v.zielStart && v.zielEnd) {
+        const endStr = dateFmt.format(v.zielEnd);
+        timeframeText = `Damit du bis zum <strong style="color:var(--gold)">${endStr}</strong> dein Zielgehalt verdienst, musst du diesen monatlichen Output spätestens ab dem Startdatum konstant abliefern.`;
+    } else {
+        timeframeText = 'Setz Start- und Enddatum, um deinen Push-Plan zu sehen.';
+    }
+
+    goalEl.innerHTML = `
+        Um <strong>${euro.format(v.ziel)}</strong> pro Monat zu erreichen, musst du auf <strong>${num0.format(neededAnwahlen)}</strong> Anwahlen pro Monat kommen — damit landest du bei <strong>${num.format(goalR.geclosed)}</strong> neuen Kunden monatlich. ${deltaText}
+        <br><br>
+        <span style="color: var(--text-muted); font-size: 0.92rem;">${timeframeText}</span>
+    `;
+
+    return { neededAnwahlen, goalR };
+}
+
+function clearCadence() {
+    ['cadMAnw','cadMErr','cadMSet','cadMKnd','cadWAnw','cadWErr','cadWSet','cadWKnd','cadDAnw','cadDErr','cadDSet','cadDKnd']
+        .forEach(id => $(id).textContent = '—');
+}
+
+// ============ SCORE ============
+function renderScore(istR, neededAnwahlen, v) {
+    let score = 0;
+    let headline = '';
+    let desc = '';
+    let cls = '';
+
+    if (!neededAnwahlen) {
+        score = 0;
+        headline = 'Daten unvollständig';
+        desc = 'Trag erst valide Quoten ein, dann bekommst du eine echte Bewertung.';
+        cls = 'crit';
+    } else {
+        // Ratio: aktuelles Gehalt zum Ziel
+        const ratio = v.ziel > 0 ? istR.gehalt / v.ziel : 0;
+
+        if (ratio >= 1.2) score = 10;
+        else if (ratio >= 1.0) score = 8 + (ratio - 1.0) * 10;
+        else if (ratio >= 0.7) score = 6 + (ratio - 0.7) * (2/0.3);
+        else if (ratio >= 0.4) score = 4 + (ratio - 0.4) * (2/0.3);
+        else if (ratio >= 0.2) score = 2 + (ratio - 0.2) * (2/0.2);
+        else score = ratio * 10;
+
+        score = Math.max(0, Math.min(10, score));
+        score = Math.round(score * 10) / 10;
+
+        if (score >= 9) {
+            headline = 'Auf Zielkurs · sogar darüber';
+            desc = `Mit deinem aktuellen Funnel und Aktivität verdienst du diesen Monat ${euro.format(istR.gehalt)} — das liegt bei oder über deinem Ziel von ${euro.format(v.ziel)}. Halten und ausbauen.`;
+            cls = 'top';
+        } else if (score >= 7) {
+            headline = 'Stark unterwegs';
+            desc = `Du bist auf gutem Weg. Dein aktuelles Gehalt von ${euro.format(istR.gehalt)} liegt nah am Ziel. Mit kleinen Hebeln (siehe unten) holst du den Rest.`;
+            cls = '';
+        } else if (score >= 5) {
+            headline = 'Solider Mittelweg';
+            desc = `Aktuell verdienst du ${euro.format(istR.gehalt)}, dein Ziel ${euro.format(v.ziel)}. Du musst die Aktivität deutlich hochfahren oder die Conversion verbessern — beides geht. Schau dir die Maßnahmen darunter an.`;
+            cls = 'warn';
+        } else if (score >= 3) {
+            headline = 'Lücke ist da · Hebel klar';
+            desc = `Aktuell verdienst du ${euro.format(istR.gehalt)} — du willst ${euro.format(v.ziel)}. Das ist eine ${num.format(v.ziel/Math.max(istR.gehalt,1))}× Steigerung. Realistisch erreichbar, aber nur mit konsequentem Drücken.`;
+            cls = 'warn';
+        } else {
+            headline = 'Großer Sprung nötig';
+            desc = `Zwischen ${euro.format(istR.gehalt)} und ${euro.format(v.ziel)} liegt eine deutliche Lücke. Entweder Ziel anpassen, Zeitrahmen verlängern oder Funnel & Aktivität fundamental hochziehen.`;
+            cls = 'crit';
+        }
+    }
+
+    const scoreEl = $('scoreNum');
+    scoreEl.textContent = num.format(score);
+    scoreEl.className = 'score-num ' + cls;
+    $('scoreHeadline').textContent = headline;
+    $('scoreDesc').innerHTML = desc;
+
+    const arcLength = 534;
+    const filled = (score / 10) * arcLength;
+    $('scoreArc').setAttribute('stroke-dasharray', `${filled} ${arcLength}`);
+}
+
+// ============ FUNNEL VIZ ============
+function renderFunnelViz(goalR) {
+    if (!goalR) {
+        $('funnelViz').innerHTML = '';
+        return;
+    }
+    const stages = [
+        { label: 'Anwahlen', val: goalR.anwahlen, unit: 'Versuche' },
+        { label: 'Erreicht', val: goalR.erreicht, unit: 'Gespräche' },
+        { label: 'Settings gelegt', val: goalR.settings, unit: 'Termine' },
+        { label: 'Ins Closing', val: goalR.inClosing, unit: 'Closings geplant' },
+        { label: 'Im Closing erschienen', val: goalR.erschienen, unit: 'live' },
+        { label: 'Kunde geclosed', val: goalR.geclosed, unit: 'Abschlüsse' }
+    ];
+    const max = stages[0].val || 1;
+    const html = `<div style="font-size: 0.78rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 600; margin-bottom: 1rem;">Ziel-Funnel · Monatswerte</div>` +
+        stages.map(s => {
+            const pct = Math.min(100, (s.val / max) * 100);
+            const valDisplay = s.val < 10 ? num.format(s.val) : num0.format(s.val);
+            return `
+                <div class="funnel-row">
+                    <div class="funnel-stage">
+                        <div class="funnel-dot"></div>
+                        <div class="funnel-name">${s.label}</div>
+                    </div>
+                    <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct}%"></div></div>
+                    <div class="funnel-val">
+                        ${valDisplay}
+                        <small>${s.unit}</small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    $('funnelViz').innerHTML = html;
+}
+
+// ============ ICP (E-Commerce) ============
+function renderICP(q, v, istR, neededAnwahlen) {
+    let segment, branchen, headcount, decider, schmerzen, reason;
+    const summe = v.summe;
+    const errQ = q.errQ;
+    const setQ = q.setFromErr;
+    const ratio = v.ziel > 0 ? istR.gehalt / v.ziel : 0;
+
+    if (summe < 5000) {
+        segment = 'Kleine Onlineshops · Aufbauphase';
+        branchen = 'Onlineshops bis 50.000 € Monatsumsatz · Nischen-Brands · Newcomer ohne Performance-Strategie · Shopify-/WooCommerce-Stores in der Anlaufphase';
+        headcount = '1–5 Mitarbeitende · Owner-geführt · oft Solopreneur';
+        decider = 'Inhaber:in / Shop-Owner direkt — entscheidet alleine, kurzer Sales-Cycle';
+        schmerzen = 'Shop konvertiert nicht (zu niedrige Conversion-Rate) · Shop wird bei Google nicht gefunden (keine SEO-Sichtbarkeit) · Konkurrenz zieht am Shop vorbei und ist sichtbarer · Werbebudget verpufft · kein funktionierender Paid-Kanal';
+        reason = `Bei einem Vertragsvolumen von <strong>${euro.format(summe)}</strong> passen kleinere E-Commerce-Brands ideal — der Owner entscheidet selbst, der Schmerz ist offensichtlich (kein Wachstum, hohe ROAS-Anforderung). Hohe Schlagzahl, schnelle Closes.`;
+    } else if (summe < 15000) {
+        segment = 'Etablierte Onlineshops · Wachstumsphase';
+        branchen = 'Onlineshops 50.000–500.000 € Monatsumsatz · DACH-Brands mit Produktportfolio · Nischen-Champions in Tiernahrung, Mode, Beauty, Garten/Outdoor, Wohnen, Kosmetik · Shopify Plus / Shopware-Stores mit Wachstumsambition';
+        headcount = '5–25 Mitarbeitende · 1–10 Mio € Jahresumsatz';
+        decider = 'Geschäftsführung / Gründer · ggf. Marketing-Lead als Influencer · 1–2 Stakeholder';
+        schmerzen = 'Shop konvertiert nicht (Conversion-Rate stagniert trotz Traffic) · Shop wird bei Google nicht gefunden (SEO-Lücken bei wichtigen Keywords) · Konkurrenz zieht am Shop vorbei und ist sichtbarer · ROAS sinkt trotz höherem Budget · einseitiger Kanal-Mix (nur Google oder nur Meta) · E-Mail-Marketing brach · Creatives nicht performant · skalieren ohne Profit-Verlust';
+        reason = `Vertragsvolumen <strong>${euro.format(summe)}</strong> ist das klassische Mittelstand-Investment für E-Commerce-Brands. Entscheider haben Budget-Hoheit und konkreten ROI-Schmerz. Vertrauensaufbau braucht 1–2 Touch-Points vor dem Setting. Realistisch closebar in 2–4 Wochen.`;
+    } else if (summe < 30000) {
+        segment = 'Skalierende Onlineshops · 7-stellig+';
+        branchen = 'Onlineshops 500.000 €–2 Mio € Monatsumsatz · etablierte Brands mit Marktposition · Multi-Channel-Player (Google + Meta + Amazon + Bing) · D2C-Brands mit Internationalisierungs-Ambition';
+        headcount = '25–80 Mitarbeitende · 10–30 Mio € Jahresumsatz';
+        decider = 'C-Level (CEO / CMO / Head of Performance) · 2–3 Stakeholder · oft eigenes Sales/Marketing-Team';
+        schmerzen = 'Shop konvertiert nicht profitabel auf höherem Niveau · Konkurrenz zieht am Shop vorbei (Wettbewerber mit stärkerer Sichtbarkeit) · Skalierungs-Plateau erreicht · ROI-Druck pro Kanal · Margen sinken · keine saubere Attribution · Internationalisierung scheitert · Top-Performer-Knowhow fehlt intern';
+        reason = `Bei <strong>${euro.format(summe)}</strong> ist der Sales-Cycle länger und der Closer braucht hochqualifizierte Termine. Du als Opener musst entsprechend höher qualifizieren — weniger Volumen, dafür sauberere Settings mit echtem Skalierungs-Schmerz.`;
+    } else {
+        segment = 'Premium-Onlineshops · Marktführer';
+        branchen = 'Onlineshops 2 Mio €+ Monatsumsatz · Marktführer ihrer Nische · Marken im DACH-/EU-Raum · Konzern-Töchter mit eigenem E-Commerce-Vertrieb · Holding-Strukturen mit mehreren Shops';
+        headcount = '80+ Mitarbeitende · 30 Mio €+ Jahresumsatz · oft eigene Performance-Teams';
+        decider = 'C-Level mit Buying Committee · 3+ Stakeholder · Procurement / Einkauf eingebunden · oft auch externe Berater im Auswahlprozess';
+        schmerzen = 'Konkurrenz zieht am Shop vorbei (Marktanteil wird angegriffen) · Shop konvertiert nicht mehr im Verhältnis zu früher · Plateau bei 2–5 Mio €/Monat · keine weiteren Skalierungs-Hebel intern · Effizienz-Druck steigt · Margen-Squeeze · Wettbewerbsdruck (Marketplaces, Direct Brands)';
+        reason = `Bei einem Volumen von <strong>${euro.format(summe)}</strong> sind hohe Schlagzahl-Strategien wirkungslos. Du brauchst Account-basierte Vorbereitung pro Termin — qualitativ statt quantitativ. Entscheider lassen sich nicht überrumpeln.`;
+    }
+
+    let modifier = '';
+    if (errQ < 0.25 && setQ < 0.3) {
+        modifier = ` <strong>Wichtig:</strong> Deine Erreichbarkeit (${pctFmt(errQ)}) und Setting-Quote (${pctFmt(setQ)}) sind aktuell niedrig — schärf den ICP härter ein. Fokussiere auf <em>genau eine</em> Branche aus der obigen Liste (z.B. nur Tier-Shops oder nur Mode), baue dort Expertise & Referenzen auf.`;
+    } else if (errQ < 0.3) {
+        modifier = ` <strong>Erreichbarkeits-Tipp:</strong> Mit ${pctFmt(errQ)} Erreichbarkeit ruf gezielt zu Stoßzeiten an — Shop-Owner sind 8–9 Uhr und 17–19 Uhr besser erreichbar. Bei größeren Brands: Donnerstag-Vormittag und Freitag bis 11 Uhr funktionieren am besten.`;
+    } else if (setQ < 0.25) {
+        modifier = ` <strong>Setting-Tipp:</strong> ${pctFmt(setQ)} Setting-Quote ist niedrig — schärf den Pain-Pitch. Frag in Sek. 0–30 konkret nach dem ROAS, dem Conversion-Wert oder dem Wachstumsplateau, nicht nach „Interesse an einem Gespräch". E-Commerce-Owner sprechen Zahlen.`;
+    } else if (ratio < 0.5 && neededAnwahlen) {
+        modifier = ` <strong>Volumen-Hinweis:</strong> Um auf ${num0.format(neededAnwahlen)} Anwahlen/Monat zu kommen, musst du Cold-Call-Disziplin durchziehen. Mehr Sitzzeit am Hörer ist hier der einzige direkte Hebel.`;
+    }
+
+    $('icpHeadline').textContent = segment;
+    $('icpGrid').innerHTML = `
+        <div class="icp-block">
+            <div class="icp-block-lbl">Branchen-Fokus · E-Commerce</div>
+            <div class="icp-block-val">${branchen}</div>
+        </div>
+        <div class="icp-block">
+            <div class="icp-block-lbl">Unternehmensgröße</div>
+            <div class="icp-block-val">${headcount}</div>
+        </div>
+        <div class="icp-block">
+            <div class="icp-block-lbl">Entscheider-Rolle</div>
+            <div class="icp-block-val">${decider}</div>
+        </div>
+        <div class="icp-block">
+            <div class="icp-block-lbl">Typische Schmerzpunkte</div>
+            <div class="icp-block-val">${schmerzen}</div>
+        </div>
+    `;
+    $('icpReason').innerHTML = `<strong>Warum diese Empfehlung:</strong> ${reason}${modifier}`;
+}
+
+// ============ MASSNAHMEN ============
+function renderActions(q, v, istR) {
+    const baseline = istR.gehalt;
+    const anwahlen = v.istAnwahlen;
+
+    function tweak({ anwUp = 0, errQUp = 0, setQUp = 0 }) {
+        const newQ = {
+            errQ: Math.min(1, q.errQ + errQUp),
+            setFromErr: Math.min(1, q.setFromErr + setQUp),
+            settingPerAnwahl: q.settingPerAnwahl
+        };
+        const newAnwahlen = anwahlen * (1 + anwUp);
+        const r = funnel(newAnwahlen, newQ, v);
+        return r.gehalt - baseline;
+    }
+
+    const measures = [
+        {
+            tag: 'Aktivität',
+            tagCls: '',
+            title: 'Mehr Anwahlen — der einfachste Hebel',
+            desc: `Du machst aktuell <strong>${num0.format(anwahlen)}</strong> Anwahlen pro Monat. Steigerung um 25 % bedeutet ${num0.format(anwahlen * 0.25)} zusätzliche Versuche — etwa ${num.format(anwahlen * 0.25 / (v.arbeitstage * 4.33))} pro Arbeitstag mehr. Reine Disziplin-Frage.`,
+            impactLabel: 'Gehalt-Plus',
+            impact: tweak({ anwUp: 0.25 }),
+            relevance: tweak({ anwUp: 0.25 })
+        },
+        {
+            tag: 'Arbeitszeit',
+            tagCls: '',
+            title: 'Mehr Zeit am Hörer · Mindestarbeitszeit ausschöpfen',
+            desc: `Die Mindestarbeitszeit liegt bei <strong>8 Stunden täglich</strong> — das ist die Basis, nicht das Maximum. <strong>Wer mehr verdienen will, macht mehr Stunden.</strong> Nutze konsequent 8 Stunden produktiv am Hörer (Pausen, Admin und Vorbereitung kommen on top, nicht innerhalb). Wer früh oder lang anbleibt — Power Hour vor 9 Uhr und nach 17 Uhr — erreicht andere Entscheider als die Mehrheit. Plus 30 % Anwahlen sind durch reine Zeitdisziplin drin.`,
+            impactLabel: 'Gehalt-Plus bei +30 % Anwahlen durch volle Zeit',
+            impact: tweak({ anwUp: 0.30 }),
+            relevance: tweak({ anwUp: 0.30 })
+        },
+        {
+            tag: 'Erreichbarkeit',
+            tagCls: '',
+            title: 'Erreichbarkeit verbessern · zu Stoßzeiten anrufen',
+            desc: `Aktuell erreichst du <strong>${pctFmt(q.errQ)}</strong>. Bei E-Commerce-Shop-Ownern funktioniert: 8–9 Uhr morgens (vor Tagesgeschäft), 17–19 Uhr abends (nach Versand-Cutoff), Donnerstag-Vormittag. Plus Voicemail-Strategie mit Rückruf-Trigger. +10 PP Erreichbarkeit bedeutet:`,
+            impactLabel: 'Gehalt-Plus bei +10 PP Erreichbarkeit',
+            impact: tweak({ errQUp: 0.10 }),
+            relevance: tweak({ errQUp: 0.10 })
+        },
+        {
+            tag: 'Opener-Skill',
+            tagCls: '',
+            title: 'Bessere Terminlegung · Setting-Quote hoch',
+            desc: `Von erreichten Leads legst du heute bei <strong>${pctFmt(q.setFromErr)}</strong> einen Setting-Termin. Der Hebel: schärferer Opener, in Sek. 0–30 nach konkreten KPIs fragen (ROAS, Conversion-Rate, Monatsumsatz), Terminvorschlag mit zwei festen Optionen. +10 PP schaffen:`,
+            impactLabel: 'Gehalt-Plus bei +10 PP Setting-Quote',
+            impact: tweak({ setQUp: 0.10 }),
+            relevance: tweak({ setQUp: 0.10 })
+        },
+        {
+            tag: 'Kombi',
+            tagCls: 'high',
+            title: 'Kombi: Mehr Volumen + bessere Erreichbarkeit',
+            desc: `+25 % Anwahlen kombiniert mit +5 PP Erreichbarkeit. Das ist realistisch über 4–6 Wochen umsetzbar und zeigt dir den überproportionalen Effekt: Hebel multiplizieren sich.`,
+            impactLabel: 'Gehalt-Plus kombiniert',
+            impact: tweak({ anwUp: 0.25, errQUp: 0.05 }),
+            relevance: tweak({ anwUp: 0.25, errQUp: 0.05 })
+        },
+        {
+            tag: 'Skill-Up',
+            tagCls: '',
+            title: 'Top-Performer schattenlauschen · Calls reviewen',
+            desc: `Der schnellste Skill-Sprung: 5 Calls/Woche von den Top-Openern hören und 5 eigene Calls reviewen lassen. Hebt typischerweise Setting-Quote in 2–3 Wochen um 5–10 PP.`,
+            impactLabel: 'Gehalt-Plus konservativ',
+            impact: tweak({ setQUp: 0.07 }),
+            relevance: tweak({ setQUp: 0.07 })
+        }
+    ];
+
+    measures.sort((a, b) => b.relevance - a.relevance);
+
+    const html = measures.map((m, i) => {
+        const isPriority = i === 0 && m.impact > 0;
+        const cls = isPriority ? 'action-card priority' : 'action-card';
+        const tagHtml = isPriority
+            ? `<div class="action-tag">Top-Hebel #1</div>`
+            : `<div class="action-tag ${m.tagCls}">${m.tag}</div>`;
+        const impactDisplay = m.impact > 0
+            ? `+ ${euro.format(m.impact)} / Monat`
+            : `±0 €`;
+        return `
+            <div class="${cls}">
+                ${tagHtml}
+                <div class="action-title">${m.title}</div>
+                <div class="action-desc">${m.desc}</div>
+                <div class="action-impact">
+                    <div class="action-impact-lbl">${m.impactLabel}</div>
+                    <div class="action-impact-val">${impactDisplay}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    $('actionsGrid').innerHTML = html;
+}
+
+// ============ MAIN UPDATE ============
+function update() {
+    const v = readVals();
+    const q = deriveIstQuotes(v);
+    const istR = funnel(v.istAnwahlen, q, v);
+
+    renderIstQuotes(q);
+    renderIstKPIs(istR);
+    renderTimeframeSummary(v);
+    const goalRes = renderGoalAndCadence(q, v, istR);
+    renderScore(istR, goalRes ? goalRes.neededAnwahlen : null, v);
+    renderFunnelViz(goalRes ? goalRes.goalR : null);
+    renderICP(q, v, istR, goalRes ? goalRes.neededAnwahlen : null);
+    renderActions(q, v, istR);
+}
+
+// ============ LISTENERS ============
+Object.values(inputs).forEach(el => {
+    if (el) el.addEventListener('input', update);
+});
+
+$('resetBtn').addEventListener('click', () => {
+    Object.entries(DEFAULTS).forEach(([k, v]) => {
+        if (inputs[k]) inputs[k].value = v;
+    });
+    update();
+});
+
+// PDF-Export: Datum setzen, Browser-Print-Dialog auslösen ("Als PDF speichern" wählen)
+$('exportBtn').addEventListener('click', () => {
+    const printDateEl = $('printDate');
+    if (printDateEl) {
+        printDateEl.textContent = dateFmt.format(new Date());
+    }
+    // Kurzer Tick, damit das DOM aktualisiert ist, bevor der Print-Dialog öffnet
+    setTimeout(() => window.print(), 50);
+});
+
+window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    $('progressBar').style.width = Math.max(0, Math.min(100, scrolled)) + '%';
+}, { passive: true });
+
+update();
+</script>
+
+</body>
+</html>
